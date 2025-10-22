@@ -74,6 +74,16 @@ class Game {
     }
     
     setupControls() {
+        // Make canvas focusable
+        this.canvas.setAttribute('tabindex', '0');
+        this.canvas.focus();
+        
+        // Click on canvas to ensure focus
+        this.canvas.addEventListener('click', () => {
+            this.canvas.focus();
+        });
+        
+        // Keyboard controls
         document.addEventListener('keydown', (e) => {
             this.keys[e.key] = true;
             // Prevent arrow keys from scrolling the page
@@ -84,6 +94,11 @@ class Game {
         
         document.addEventListener('keyup', (e) => {
             this.keys[e.key] = false;
+        });
+        
+        // Auto-focus on load
+        window.addEventListener('load', () => {
+            this.canvas.focus();
         });
     }
     
