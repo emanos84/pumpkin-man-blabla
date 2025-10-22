@@ -74,32 +74,80 @@ class Game {
     }
     
     setupControls() {
-        // Make canvas focusable
-        this.canvas.setAttribute('tabindex', '0');
-        this.canvas.focus();
-        
-        // Click on canvas to ensure focus
-        this.canvas.addEventListener('click', () => {
-            this.canvas.focus();
-        });
-        
-        // Keyboard controls
-        document.addEventListener('keydown', (e) => {
+        // Keyboard controls - attach to window for better compatibility
+        window.addEventListener('keydown', (e) => {
+            console.log('Key pressed:', e.key); // Debug log
             this.keys[e.key] = true;
+            
             // Prevent arrow keys from scrolling the page
-            if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+            if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
                 e.preventDefault();
             }
-        });
+        }, true);
         
-        document.addEventListener('keyup', (e) => {
+        window.addEventListener('keyup', (e) => {
             this.keys[e.key] = false;
+        }, true);
+        
+        // Also add WASD support as alternative
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'w' || e.key === 'W') this.keys['ArrowUp'] = true;
+            if (e.key === 's' || e.key === 'S') this.keys['ArrowDown'] = true;
+            if (e.key === 'a' || e.key === 'A') this.keys['ArrowLeft'] = true;
+            if (e.key === 'd' || e.key === 'D') this.keys['ArrowRight'] = true;
+        }, true);
+        
+        window.addEventListener('keyup', (e) => {
+            if (e.key === 'w' || e.key === 'W') this.keys['ArrowUp'] = false;
+            if (e.key === 's' || e.key === 'S') this.keys['ArrowDown'] = false;
+            if (e.key === 'a' || e.key === 'A') this.keys['ArrowLeft'] = false;
+            if (e.key === 'd' || e.key === 'D') this.keys['ArrowRight'] = false;
+        }, true);
+        
+        // Touch/Mobile support
+        let touchStartX = 0;
+        let touchStartY = 0;
+        
+        this.canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, { passive: false });
+        
+        this.canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (!touchStartX || !touchStartY) return;
+            
+            const touchEndX = e.touches[0].clientX;
+            const touchEndY = e.touches[0].clientY;
+            
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = touchEndY - touchStartY;
+            
+            // Reset all directions
+            this.keys['ArrowUp'] = false;
+            this.keys['ArrowDown'] = false;
+            this.keys['ArrowLeft'] = false;
+            this.keys['ArrowRight'] = false;
+            
+            // Determine direction based on larger delta
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                if (deltaX > 0) this.keys['ArrowRight'] = true;
+                else this.keys['ArrowLeft'] = true;
+            } else {
+                if (deltaY > 0) this.keys['ArrowDown'] = true;
+                else this.keys['ArrowUp'] = true;
+            }
+        }, { passive: false });
+        
+        this.canvas.addEventListener('touchend', () => {
+            this.keys['ArrowUp'] = false;
+            this.keys['ArrowDown'] = false;
+            this.keys['ArrowLeft'] = false;
+            this.keys['ArrowRight'] = false;
         });
         
-        // Auto-focus on load
-        window.addEventListener('load', () => {
-            this.canvas.focus();
-        });
+        console.log('Controls initialized!'); // Debug log
     }
     
     startTimer() {
@@ -330,6 +378,12 @@ class Game {
 }
 
 // Start game when page loads
-window.addEventListener('load', () => {
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('Starting game...');
+        new Game();
+    });
+} else {
+    console.log('Starting game...');
     new Game();
-});
+}
