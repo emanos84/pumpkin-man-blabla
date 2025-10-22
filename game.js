@@ -18,7 +18,8 @@ class Game {
         this.score = 0;
         this.lives = 3;
         this.timeLeft = 90;
-        this.gameRunning = true;
+        this.gameRunning = false; // Changed to false - game starts paused
+        this.gameStarted = false; // New flag for start screen
         
         // Maze layout (1 = wall, 0 = path, 2 = pumpkin)
         this.maze = [
@@ -39,12 +40,12 @@ class Game {
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
         ];
         
-        // Player
+        // Player - starts in center of maze
         this.player = {
-            x: 1,
-            y: 1,
+            x: 9, // Center column (19 cols / 2 ≈ 9)
+            y: 7, // Center row (15 rows / 2 ≈ 7)
             size: this.tileSize * 0.7,
-            speed: 1,
+            speed: 0.15, // Increased from 1 to 0.15 for smooth movement
             color: '#FF7518'
         };
         
@@ -56,11 +57,37 @@ class Game {
         this.totalPumpkins = this.countPumpkins();
         this.collectedPumpkins = 0;
         
-        // Start game loop
+        // Setup start button
+        this.setupStartButton();
+        
+        // Start game loop (will render but not update until game starts)
         this.lastTime = 0;
         this.animationFrame = null;
-        this.startTimer();
         this.gameLoop();
+    }
+    
+    setupStartButton() {
+        const startButton = document.getElementById('startButton');
+        if (startButton) {
+            startButton.addEventListener('click', () => {
+                this.startGame();
+            });
+        }
+    }
+    
+    startGame() {
+        // Hide start screen, show game screen
+        document.getElementById('startScreen').classList.add('hidden');
+        document.getElementById('gameScreen').classList.remove('hidden');
+        
+        // Start the game
+        this.gameRunning = true;
+        this.gameStarted = true;
+        
+        // Start timer
+        this.startTimer();
+        
+        console.log('Game started!');
     }
     
     countPumpkins() {
@@ -151,6 +178,11 @@ class Game {
     }
     
     startTimer() {
+        // Don't start timer until game starts
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+        }
+        
         this.timerInterval = setInterval(() => {
             if (this.gameRunning && this.timeLeft > 0) {
                 this.timeLeft--;
@@ -163,6 +195,13 @@ class Game {
         }, 1000);
     }
     
+    startGame() {
+        this.gameStarted = true;
+        this.gameRunning = true;
+        this.startTimer();
+        console.log('Game started!');
+    }
+    
     update() {
         if (!this.gameRunning) return;
         
@@ -170,18 +209,18 @@ class Game {
         const oldX = this.player.x;
         const oldY = this.player.y;
         
-        // Handle player movement
+        // Handle player movement - now using direct speed value
         if (this.keys['ArrowUp']) {
-            this.player.y -= this.player.speed * 0.1;
+            this.player.y -= this.player.speed;
         }
         if (this.keys['ArrowDown']) {
-            this.player.y += this.player.speed * 0.1;
+            this.player.y += this.player.speed;
         }
         if (this.keys['ArrowLeft']) {
-            this.player.x -= this.player.speed * 0.1;
+            this.player.x -= this.player.speed;
         }
         if (this.keys['ArrowRight']) {
-            this.player.x += this.player.speed * 0.1;
+            this.player.x += this.player.speed;
         }
         
         // Check collision with walls
@@ -345,7 +384,7 @@ class Game {
         
         this.ctx.fillStyle = '#fff';
         this.ctx.font = '18px Arial';
-        this.ctx.fillText('Refresh to play again', this.canvas.width/2, this.canvas.height/2 + 100);
+        this.ctx.fillText('Press F5 or Refresh to play again', this.canvas.width/2, this.canvas.height/2 + 100);
     }
     
     gameWin() {
@@ -373,7 +412,7 @@ class Game {
         
         this.ctx.fillStyle = '#fff';
         this.ctx.font = '18px Arial';
-        this.ctx.fillText('Refresh to play again', this.canvas.width/2, this.canvas.height/2 + 130);
+        this.ctx.fillText('Press F5 or Refresh to play again', this.canvas.width/2, this.canvas.height/2 + 130);
     }
 }
 
