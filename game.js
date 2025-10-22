@@ -51,11 +51,13 @@ class Game {
         
         // Input handling
         this.keys = {};
-        this.setupControls();
         
         // Count initial pumpkins
         this.totalPumpkins = this.countPumpkins();
         this.collectedPumpkins = 0;
+        
+        // Setup controls BEFORE start button
+        this.setupControls();
         
         // Setup start button
         this.setupStartButton();
@@ -91,7 +93,7 @@ class Game {
         // Start timer
         this.startTimer();
         
-        console.log('Game started!');
+        console.log('Game started! Running:', this.gameRunning, 'Keys:', this.keys);
     }
     
     countPumpkins() {
@@ -224,24 +226,37 @@ class Game {
     }
     
     update() {
-        if (!this.gameRunning) return;
+        if (!this.gameRunning) {
+            console.log('Update skipped - game not running');
+            return;
+        }
         
         // Store old position
         const oldX = this.player.x;
         const oldY = this.player.y;
         
+        let moved = false;
+        
         // Handle player movement - now using direct speed value
         if (this.keys['ArrowUp']) {
             this.player.y -= this.player.speed;
+            moved = true;
         }
         if (this.keys['ArrowDown']) {
             this.player.y += this.player.speed;
+            moved = true;
         }
         if (this.keys['ArrowLeft']) {
             this.player.x -= this.player.speed;
+            moved = true;
         }
         if (this.keys['ArrowRight']) {
             this.player.x += this.player.speed;
+            moved = true;
+        }
+        
+        if (moved) {
+            console.log('Player moved to:', this.player.x, this.player.y);
         }
         
         // Check collision with walls
