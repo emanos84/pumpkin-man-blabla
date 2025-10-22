@@ -40,12 +40,12 @@ class Game {
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
         ];
         
-        // Player - starts in center of maze
+        // Player - Start in a safe position (outside ghost house)
         this.player = {
-            x: 9, // Center column (19 cols / 2 ≈ 9)
-            y: 7, // Center row (15 rows / 2 ≈ 7)
+            x: 9,  // Center column
+            y: 11, // Below the ghost house - safe area
             size: this.tileSize * 0.7,
-            speed: 0.15, // Increased from 1 to 0.15 for smooth movement
+            speed: 0.15,
             color: '#FF7518'
         };
         
@@ -70,14 +70,10 @@ class Game {
     
     setupStartButton() {
         const startButton = document.getElementById('startButton');
-        console.log('Start button found:', startButton ? 'Yes' : 'No');
         if (startButton) {
             startButton.addEventListener('click', () => {
-                console.log('Start button clicked!');
                 this.startGame();
             });
-        } else {
-            console.error('Start button not found!');
         }
     }
     
@@ -109,7 +105,6 @@ class Game {
     setupControls() {
         // Keyboard controls - attach to window for better compatibility
         window.addEventListener('keydown', (e) => {
-            console.log('Key pressed:', e.key); // Debug log
             this.keys[e.key] = true;
             
             // Prevent arrow keys from scrolling the page
@@ -202,8 +197,6 @@ class Game {
     }
     
     startGame() {
-        console.log('Starting game...');
-        
         // Hide start screen, show game screen
         const startScreen = document.getElementById('startScreen');
         const gameScreen = document.getElementById('gameScreen');
@@ -221,42 +214,27 @@ class Game {
         
         // Start timer
         this.startTimer();
-        
-        console.log('Game started! Timer running:', this.timerInterval ? 'Yes' : 'No');
     }
     
     update() {
-        if (!this.gameRunning) {
-            console.log('Update skipped - game not running');
-            return;
-        }
+        if (!this.gameRunning) return;
         
         // Store old position
         const oldX = this.player.x;
         const oldY = this.player.y;
         
-        let moved = false;
-        
         // Handle player movement - now using direct speed value
         if (this.keys['ArrowUp']) {
             this.player.y -= this.player.speed;
-            moved = true;
         }
         if (this.keys['ArrowDown']) {
             this.player.y += this.player.speed;
-            moved = true;
         }
         if (this.keys['ArrowLeft']) {
             this.player.x -= this.player.speed;
-            moved = true;
         }
         if (this.keys['ArrowRight']) {
             this.player.x += this.player.speed;
-            moved = true;
-        }
-        
-        if (moved) {
-            console.log('Player moved to:', this.player.x, this.player.y);
         }
         
         // Check collision with walls
@@ -454,7 +432,6 @@ class Game {
 
 // Start game when page loads
 window.addEventListener('load', () => {
-    console.log('Page fully loaded, starting game...');
     // Small delay to ensure all DOM elements are ready
     setTimeout(() => {
         new Game();
