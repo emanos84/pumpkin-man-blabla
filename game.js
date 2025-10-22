@@ -68,10 +68,14 @@ class Game {
     
     setupStartButton() {
         const startButton = document.getElementById('startButton');
+        console.log('Start button found:', startButton ? 'Yes' : 'No');
         if (startButton) {
             startButton.addEventListener('click', () => {
+                console.log('Start button clicked!');
                 this.startGame();
             });
+        } else {
+            console.error('Start button not found!');
         }
     }
     
@@ -196,10 +200,27 @@ class Game {
     }
     
     startGame() {
+        console.log('Starting game...');
+        
+        // Hide start screen, show game screen
+        const startScreen = document.getElementById('startScreen');
+        const gameScreen = document.getElementById('gameScreen');
+        
+        if (startScreen) {
+            startScreen.classList.add('hidden');
+        }
+        if (gameScreen) {
+            gameScreen.classList.remove('hidden');
+        }
+        
+        // Start the game
         this.gameStarted = true;
         this.gameRunning = true;
+        
+        // Start timer
         this.startTimer();
-        console.log('Game started!');
+        
+        console.log('Game started! Timer running:', this.timerInterval ? 'Yes' : 'No');
     }
     
     update() {
@@ -417,12 +438,10 @@ class Game {
 }
 
 // Start game when page loads
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        console.log('Starting game...');
+window.addEventListener('load', () => {
+    console.log('Page fully loaded, starting game...');
+    // Small delay to ensure all DOM elements are ready
+    setTimeout(() => {
         new Game();
-    });
-} else {
-    console.log('Starting game...');
-    new Game();
-}
+    }, 100);
+});
